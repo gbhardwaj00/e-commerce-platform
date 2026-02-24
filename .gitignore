@@ -35,3 +35,74 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# -----------------------------
+# Secrets / env files
+# -----------------------------
+.env
+.env.*
+!.env.example
+
+# If you keep env files inside infra/
+infra/.env
+infra/.env.*
+!infra/.env.example
+
+# -----------------------------
+# Spring Boot secret overrides
+# -----------------------------
+application-local.yml
+application-local.yaml
+application-local.properties
+
+application-*-local.yml
+application-*-local.yaml
+application-*-local.properties
+
+# Optional: any "secret" profile naming you use
+application-secrets.yml
+application-secrets.yaml
+application-secrets.properties
+
+# -----------------------------
+# Docker / Compose secrets
+# -----------------------------
+docker-compose.override.yml
+docker-compose.*.yml
+!docker-compose.yml
+!docker-compose.dev.yml
+!docker-compose.prod.yml
+# If your compose lives under infra/
+infra/docker-compose.override.yml
+infra/docker-compose.*.yml
+!infra/docker-compose.yml
+!infra/docker-compose.dev.yml
+!infra/docker-compose.prod.yml
+
+compose.yaml
+compose.yml
+compose.override.yaml
+compose.override.yml
+
+# If it's inside infra/
+infra/compose.yaml
+infra/compose.yml
+infra/compose.override.yaml
+infra/compose.override.yml
+
+# -----------------------------
+# Certificates / keys
+# -----------------------------
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+*.keystore
+
+# -----------------------------
+# Logs / runtime files
+# -----------------------------
+*.log
+logs/
+tmp/
