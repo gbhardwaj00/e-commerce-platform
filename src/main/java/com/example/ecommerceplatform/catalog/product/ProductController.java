@@ -1,11 +1,11 @@
 package com.example.ecommerceplatform.catalog.product;
 
-import com.example.ecommerceplatform.catalog.product.Product;
-import com.example.ecommerceplatform.catalog.product.ProductRepository;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import com.example.ecommerceplatform.catalog.product.ProductService;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,30 +13,16 @@ import java.util.UUID;
 @RequestMapping("api/v1/products")
 public class ProductController {
 
-    private final ProductRepository repo;
+    private final ProductService service;
 
-    // DI + IOC
-    public ProductController(ProductRepository repo) {
-        this.repo = repo;
+    public ProductController(ProductService service) {
+        this.service = service;
     }
 
     @GetMapping
-    public List<Product> list() {
-        return repo.findAll();
+    public List<ProductResponseDTO> list() {
+        return service.list();
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Product create(@RequestBody Product req) {
-        if (req.getId() == null) req.setId(UUID.randomUUID());
 
-        OffsetDateTime now = OffsetDateTime.now();
-
-        if(req.getCreatedAt() == null) req.setCreatedAt(now);
-        req.setUpdatedAt(now);
-
-        if (req.getQuantityAvailable() == null) req.setQuantityAvailable(0);
-
-        return repo.save(req);
-    }
 }
