@@ -1,5 +1,6 @@
 package com.example.ecommerceplatform.catalog.product;
 
+import jakarta.validation.Valid;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -17,5 +18,17 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<ProductResponseDTO> list() {
         return repo.findAll().stream().map(ProductMapper::toDTO).toList();
+    }
+
+    @Transactional
+    public ProductResponseDTO create(ProductCreateRequestDTO req) {
+        Product saved = repo.save(ProductMapper.toEntity((req)));
+        return ProductMapper.toDTO(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponseDTO get(UUID id) {
+        Product p = repo.findById(id).orElseThrow(() -> ProductNotFoundException(id));
+        return ProductMapper.toDTO(p);
     }
 }

@@ -24,5 +24,13 @@ public class ProductController {
         return service.list();
     }
 
+    @PostMapping
+    public ProductResponseDTO create(@Valid @RequestBody ProductCreateRequestDTO req) {
+        return service.create(req);
+    }
 
+    @GetMapping("/{id}")
+    public ProductResponseDTO get(@PathVariable UUID id) {
+        return service.get(id);
+    }
 }
