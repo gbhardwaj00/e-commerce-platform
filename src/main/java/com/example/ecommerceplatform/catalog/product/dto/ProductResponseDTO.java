@@ -1,4 +1,4 @@
-package com.example.ecommerceplatform.catalog.product;
+package com.example.ecommerceplatform.catalog.product.dto;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

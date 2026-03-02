@@ -1,10 +1,11 @@
 package com.example.ecommerceplatform.catalog.product;
 
+import com.example.ecommerceplatform.catalog.product.dto.ProductCreateRequestDTO;
+import com.example.ecommerceplatform.catalog.product.dto.ProductResponseDTO;
+import com.example.ecommerceplatform.catalog.product.dto.ProductUpdateRequestDTO;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import com.example.ecommerceplatform.catalog.product.ProductService;
 
 import java.util.List;
 import java.util.UUID;

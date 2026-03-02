@@ -1,5 +1,8 @@
 package com.example.ecommerceplatform.catalog.product;
 
+import com.example.ecommerceplatform.catalog.product.dto.ProductCreateRequestDTO;
+import com.example.ecommerceplatform.catalog.product.dto.ProductResponseDTO;
+import com.example.ecommerceplatform.catalog.product.dto.ProductUpdateRequestDTO;
 import jakarta.validation.Valid;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
