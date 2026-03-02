@@ -39,4 +39,10 @@ public class ProductService {
         ProductMapper.applyUpdate(existing, dto);
         return ProductMapper.toDTO(existing);
     }
+
+    @Transactional
+    public void delete(UUID id) {
+        if (!repo.existsById(id)) throw new ProductNotFoundException(id);
+        repo.deleteById(id);
+    }
 }
