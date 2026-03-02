@@ -3,6 +3,7 @@ package com.example.ecommerceplatform.catalog.product;
 import jakarta.validation.Valid;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import com.example.ecommerceplatform.catalog.product.exception.ProductNotFoundException;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +29,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductResponseDTO get(UUID id) {
-        Product p = repo.findById(id).orElseThrow(() -> ProductNotFoundException(id));
+        Product p = repo.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
         return ProductMapper.toDTO(p);
     }
 }
