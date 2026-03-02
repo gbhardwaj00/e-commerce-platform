@@ -19,18 +19,27 @@ public class ProductController {
         this.service = service;
     }
 
+    // READ
     @GetMapping
     public List<ProductResponseDTO> list() {
         return service.list();
-    }
-
-    @PostMapping
-    public ProductResponseDTO create(@Valid @RequestBody ProductCreateRequestDTO req) {
-        return service.create(req);
     }
 
     @GetMapping("/{id}")
     public ProductResponseDTO get(@PathVariable UUID id) {
         return service.get(id);
     }
+
+    // CREATE
+    @PostMapping
+    public ProductResponseDTO create(@Valid @RequestBody ProductCreateRequestDTO req) {
+        return service.create(req);
+    }
+
+    // UPDATE
+    @PutMapping("/{id}")
+    public ProductResponseDTO put(@PathVariable UUID id, @Valid @RequestBody ProductUpdateRequestDTO dto) {
+        return service.update(id, dto);
+    }
+
 }

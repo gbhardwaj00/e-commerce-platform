@@ -32,4 +32,11 @@ public class ProductService {
         Product p = repo.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
         return ProductMapper.toDTO(p);
     }
+
+    @Transactional
+    public ProductResponseDTO update(UUID id, @Valid ProductUpdateRequestDTO dto) {
+        Product existing = repo.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
+        ProductMapper.applyUpdate(existing, dto);
+        return ProductMapper.toDTO(existing);
+    }
 }
