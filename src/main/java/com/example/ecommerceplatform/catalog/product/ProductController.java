@@ -4,6 +4,8 @@ import com.example.ecommerceplatform.catalog.product.dto.ProductCreateRequestDTO
 import com.example.ecommerceplatform.catalog.product.dto.ProductResponseDTO;
 import com.example.ecommerceplatform.catalog.product.dto.ProductUpdateRequestDTO;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +24,8 @@ public class ProductController {
 
     // READ
     @GetMapping
-    public List<ProductResponseDTO> list() {
-        return service.list();
+    public Page<ProductResponseDTO> list(@RequestParam(required = false) String query, Pageable pageable) {
+        return service.list(query, pageable);
     }
 
     @GetMapping("/{id}")

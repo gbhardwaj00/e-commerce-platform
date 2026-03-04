@@ -4,6 +4,8 @@ import com.example.ecommerceplatform.catalog.product.dto.ProductCreateRequestDTO
 import com.example.ecommerceplatform.catalog.product.dto.ProductResponseDTO;
 import com.example.ecommerceplatform.catalog.product.dto.ProductUpdateRequestDTO;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import com.example.ecommerceplatform.catalog.product.exception.ProductNotFoundException;
@@ -20,8 +22,14 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDTO> list() {
-        return repo.findAll().stream().map(ProductMapper::toDTO).toList();
+    public Page<ProductResponseDTO> list(String query, Pageable pageable) {
+        Page<Product> page;
+        if(query == null || query.isBlank()) {
+            page = repo.findAll(pageable);
+        } else{
+            page = repo.findByTitleContainingIgnoreCase(query, pageable);
+        }
+        return page.map(ProductMapper::toDTO);
     }
 
     @Transactional
