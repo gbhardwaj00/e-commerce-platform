@@ -27,7 +27,7 @@ public class ProductService {
         if(query == null || query.isBlank()) {
             page = repo.findAll(pageable);
         } else{
-            page = repo.findByTitleContainingIgnoreCase(query, pageable);
+            page = repo.findByTitleContainingIgnoreCase(query.trim(), pageable);
         }
         return page.map(ProductMapper::toDTO);
     }
