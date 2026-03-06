@@ -3,14 +3,13 @@ package com.example.ecommerceplatform.catalog.product;
 import com.example.ecommerceplatform.catalog.product.dto.ProductCreateRequestDTO;
 import com.example.ecommerceplatform.catalog.product.dto.ProductResponseDTO;
 import com.example.ecommerceplatform.catalog.product.dto.ProductUpdateRequestDTO;
+import com.example.ecommerceplatform.common.NotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
-import com.example.ecommerceplatform.catalog.product.exception.ProductNotFoundException;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -40,20 +39,20 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductResponseDTO get(UUID id) {
-        Product p = repo.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
+        Product p = repo.findById(id).orElseThrow(() -> new NotFoundException("Product not found: " + id));
         return ProductMapper.toDTO(p);
     }
 
     @Transactional
     public ProductResponseDTO update(UUID id, @Valid ProductUpdateRequestDTO dto) {
-        Product existing = repo.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
+        Product existing = repo.findById(id).orElseThrow(() -> new NotFoundException("Product not found: " + id));
         ProductMapper.applyUpdate(existing, dto);
         return ProductMapper.toDTO(existing);
     }
 
     @Transactional
     public void delete(UUID id) {
-        if (!repo.existsById(id)) throw new ProductNotFoundException(id);
+        if (!repo.existsById(id)) throw new NotFoundException("Product not found: " + id);
         repo.deleteById(id);
     }
 }

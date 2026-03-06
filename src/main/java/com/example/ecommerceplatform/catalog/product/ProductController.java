@@ -8,11 +8,9 @@ import com.example.ecommerceplatform.common.dto.PageResponseMapper;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.jaxb.SpringDataJaxb;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -54,5 +52,11 @@ public class ProductController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
         service.delete(id);
+    }
+
+    // TEST Server Error
+    @GetMapping("/debug/boom")
+    public void boom() {
+        throw new RuntimeException("boom");
     }
 }

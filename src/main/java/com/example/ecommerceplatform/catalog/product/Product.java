@@ -1,6 +1,7 @@
 package com.example.ecommerceplatform.catalog.product;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.ColumnDefault;
@@ -15,18 +16,19 @@ public class Product {
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @NotNull
+    @NotBlank
     @Column(nullable = false)
     private String title;
 
     @Column
     private String description;
 
+    @NotNull
     @Column(name = "price_cents", nullable = false)
     private Integer priceCents;
 
     @Size(max = 3)
-    @NotNull
+    @NotBlank
     @Column(name = "currency", nullable = false, length=3)
     private String currency;
 
