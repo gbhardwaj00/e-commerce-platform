@@ -56,4 +56,17 @@ public class GlobalExceptionHandler{
                 null
         );
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponseDTO handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest req) {
+        return new ErrorResponseDTO(
+          OffsetDateTime.now(),
+          400,
+          "Bad Request",
+          ex.getMessage(),
+          req.getRequestURI(),
+        null
+        );
+    }
 }
