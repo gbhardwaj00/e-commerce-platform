@@ -1,9 +1,6 @@
 package com.example.ecommerceplatform.cart;
 
-import com.example.ecommerceplatform.cart.dto.AddCartItemRequestDTO;
-import com.example.ecommerceplatform.cart.dto.CartCreateResponseDTO;
-import com.example.ecommerceplatform.cart.dto.CartViewDTO;
-import com.example.ecommerceplatform.cart.dto.UpdateCartItemRequestDTO;
+import com.example.ecommerceplatform.cart.dto.*;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +18,7 @@ public class CartController {
 
     // View cart and items
     @GetMapping("/{cartId}")
-    public CartViewDTO view(@PathVariable UUID cartId) {
+    public CartDetailedViewDTO view(@PathVariable UUID cartId) {
         return service.view(cartId);
     }
 
@@ -35,13 +32,13 @@ public class CartController {
     // add an item to the cart
     @PostMapping("/{cartId}/items")
     @ResponseStatus(HttpStatus.OK)
-    public CartViewDTO addItem(@PathVariable UUID cartId, @Valid @RequestBody AddCartItemRequestDTO req) {
+    public CartDetailedViewDTO addItem(@PathVariable UUID cartId, @Valid @RequestBody AddCartItemRequestDTO req) {
         return service.addItem(cartId, req);
     }
 
     @PutMapping("/{cartId}/items/{prodId}")
     @ResponseStatus(HttpStatus.OK)
-    public CartViewDTO setQuantity(
+    public CartDetailedViewDTO setQuantity(
             @PathVariable UUID cartId,
             @PathVariable UUID prodId,
             @Valid @RequestBody UpdateCartItemRequestDTO dto) {
@@ -49,7 +46,7 @@ public class CartController {
     }
 
     @DeleteMapping("/{cartId}/items/{prodId}")
-    public CartViewDTO removeItem(
+    public CartDetailedViewDTO removeItem(
         @PathVariable UUID cartId,
         @PathVariable UUID prodId
     ) {

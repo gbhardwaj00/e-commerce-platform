@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CartService {
@@ -25,16 +28,48 @@ public class CartService {
     }
 
     @Transactional(readOnly = true)
-    public CartViewDTO view(UUID cartId) {
+    public CartDetailedViewDTO view(UUID cartId) {
         Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
 
-        List<CartItemViewDTO> items = itemRepo.findByCartId(cartId)
-                .stream()
-                .map(ci -> new CartItemViewDTO(ci.getProductId(), ci.getQuantity()))
-                .toList();
+        List<CartItem> cartItems = itemRepo.findByCartId(cartId);
 
-        return new CartViewDTO(cart.getId(), items);
+        Map<UUID, Product> productsById = prodRepo.findAllById(
+                cartItems.stream().map(CartItem::getProductId).toList())
+                .stream().collect(Collectors.toMap(Product::getId, p->p));
+
+        List<CartItemDetailedDTO> items = new ArrayList<>();
+        int total = 0;
+        String currency = null;
+
+        for (CartItem ci : cartItems) {
+            Product p = productsById.get(ci.getProductId());
+            if (p == null) {
+                throw new NotFoundException("Product not found: " + ci.getProductId());
+            }
+
+            int lineTotal = p.getPriceCents() * ci.getQuantity();
+            total += lineTotal;
+
+            if (currency == null) {
+                currency = p.getCurrency();
+            }
+
+            items.add(new CartItemDetailedDTO(
+                    p.getId(),
+                    p.getTitle(),
+                    p.getPriceCents(),
+                    p.getCurrency(),
+                    ci.getQuantity(),
+                    lineTotal
+            ));
+        }
+        return new CartDetailedViewDTO(
+                cart.getId(),
+                items,
+                total,
+                currency
+        );
     }
 
     @Transactional
@@ -52,7 +87,7 @@ public class CartService {
     }
 
     @Transactional
-    public CartViewDTO addItem(UUID cartId, @Valid AddCartItemRequestDTO dto) {
+    public CartDetailedViewDTO addItem(UUID cartId, @Valid AddCartItemRequestDTO dto) {
         Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
 
@@ -88,7 +123,7 @@ public class CartService {
     }
 
     @Transactional
-    public CartViewDTO setItemQuantity(UUID cartId, UUID prodId, @Valid UpdateCartItemRequestDTO dto) {
+    public CartDetailedViewDTO setItemQuantity(UUID cartId, UUID prodId, @Valid UpdateCartItemRequestDTO dto) {
         Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
 
@@ -117,7 +152,7 @@ public class CartService {
     }
 
     @Transactional
-    public CartViewDTO removeItem(UUID cartId, UUID prodId) {
+    public CartDetailedViewDTO removeItem(UUID cartId, UUID prodId) {
         Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
 
