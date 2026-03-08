@@ -1,9 +1,6 @@
 package com.example.ecommerceplatform.cart;
 
-import com.example.ecommerceplatform.cart.dto.AddCartItemRequestDTO;
-import com.example.ecommerceplatform.cart.dto.CartCreateResponseDTO;
-import com.example.ecommerceplatform.cart.dto.CartItemViewDTO;
-import com.example.ecommerceplatform.cart.dto.CartViewDTO;
+import com.example.ecommerceplatform.cart.dto.*;
 import com.example.ecommerceplatform.catalog.product.Product;
 import com.example.ecommerceplatform.catalog.product.ProductRepository;
 import com.example.ecommerceplatform.common.NotFoundException;
@@ -54,6 +51,7 @@ public class CartService {
         return new CartCreateResponseDTO(cart.getId());
     }
 
+    @Transactional
     public CartViewDTO addItem(UUID cartId, @Valid AddCartItemRequestDTO dto) {
         Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
@@ -80,6 +78,35 @@ public class CartService {
             throw new IllegalArgumentException("Requested quantity exceeds available stock");
         }
         item.setQuantity(newQty);
+        item.setUpdatedAt(OffsetDateTime.now());
+        itemRepo.save(item);
+
+        cart.setUpdatedAt(OffsetDateTime.now());
+        cartRepo.save(cart);
+
+        return view(cartId);
+    }
+
+    @Transactional
+    public CartViewDTO setItemQuantity(UUID cartId, UUID prodId, @Valid UpdateCartItemRequestDTO dto) {
+        Cart cart = cartRepo.findById(cartId)
+                .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
+
+        Product product = prodRepo.findById(prodId)
+                .orElseThrow(() -> new NotFoundException("Product not found: " + prodId));
+
+        CartItemId cartItemId = new CartItemId(cartId, prodId);
+        CartItem item = itemRepo.findById(cartItemId)
+                .orElseThrow(() -> new NotFoundException("Cart item not found for product: " + prodId));
+
+        int newQuantity = dto.newQuantity();
+        int availableQuantity = product.getQuantityAvailable();
+
+        if (newQuantity > availableQuantity) {
+            throw new IllegalArgumentException("Requested quantity exceeds available stock");
+        }
+
+        item.setQuantity(newQuantity);
         item.setUpdatedAt(OffsetDateTime.now());
         itemRepo.save(item);
 
