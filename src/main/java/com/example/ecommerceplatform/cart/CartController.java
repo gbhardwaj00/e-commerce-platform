@@ -47,4 +47,12 @@ public class CartController {
             @Valid @RequestBody UpdateCartItemRequestDTO dto) {
         return service.setItemQuantity(cartId, prodId, dto);
     }
+
+    @DeleteMapping("/{cartId}/items/{prodId}")
+    public CartViewDTO removeItem(
+        @PathVariable UUID cartId,
+        @PathVariable UUID prodId
+    ) {
+        return service.removeItem(cartId, prodId);
+    }
 }

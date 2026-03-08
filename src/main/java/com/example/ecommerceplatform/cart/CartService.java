@@ -95,8 +95,8 @@ public class CartService {
         Product product = prodRepo.findById(prodId)
                 .orElseThrow(() -> new NotFoundException("Product not found: " + prodId));
 
-        CartItemId cartItemId = new CartItemId(cartId, prodId);
-        CartItem item = itemRepo.findById(cartItemId)
+        CartItemId itemId = new CartItemId(cartId, prodId);
+        CartItem item = itemRepo.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Cart item not found for product: " + prodId));
 
         int newQuantity = dto.newQuantity();
@@ -109,6 +109,28 @@ public class CartService {
         item.setQuantity(newQuantity);
         item.setUpdatedAt(OffsetDateTime.now());
         itemRepo.save(item);
+
+        cart.setUpdatedAt(OffsetDateTime.now());
+        cartRepo.save(cart);
+
+        return view(cartId);
+    }
+
+    @Transactional
+    public CartViewDTO removeItem(UUID cartId, UUID prodId) {
+        Cart cart = cartRepo.findById(cartId)
+                .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
+
+        if (!prodRepo.existsById(prodId)) {
+            throw new NotFoundException("Product not found: " + prodId);
+        }
+
+        CartItemId itemId = new CartItemId(cartId, prodId);
+        if (!itemRepo.existsById(itemId)) {
+            throw new NotFoundException("Cart item not found for product: " + prodId);
+        }
+
+        itemRepo.deleteById(itemId);
 
         cart.setUpdatedAt(OffsetDateTime.now());
         cartRepo.save(cart);
