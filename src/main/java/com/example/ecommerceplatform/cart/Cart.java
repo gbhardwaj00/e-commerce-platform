@@ -1,7 +1,9 @@
 package com.example.ecommerceplatform.cart;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -19,7 +21,10 @@ public class Cart {
 
     @NotNull
     @Column(nullable = false)
-    private  OffsetDateTime updatedAt;
+    private OffsetDateTime updatedAt;
+
+    @Column(length = 3)
+    private String currency;
 
     protected Cart() {}
 
@@ -45,5 +50,13 @@ public class Cart {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }

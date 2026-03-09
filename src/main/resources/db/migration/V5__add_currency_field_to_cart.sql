@@ -1,0 +1,1 @@
+ALTER TABLE carts ADD COLUMN currency VARCHAR(3);
