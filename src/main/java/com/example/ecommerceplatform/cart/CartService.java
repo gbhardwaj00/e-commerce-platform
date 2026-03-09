@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +37,6 @@ public class CartService {
 
         List<CartItemDetailedDTO> items = new ArrayList<>();
         int total = 0;
-        String currency = null;
 
         for (CartItem ci : cartItems) {
             Product p = productsById.get(ci.getProductId());
@@ -50,10 +46,6 @@ public class CartService {
 
             int lineTotal = p.getPriceCents() * ci.getQuantity();
             total += lineTotal;
-
-            if (currency == null) {
-                currency = p.getCurrency();
-            }
 
             items.add(new CartItemDetailedDTO(
                     p.getId(),
@@ -68,7 +60,7 @@ public class CartService {
                 cart.getId(),
                 items,
                 total,
-                currency
+                cart.getCurrency()
         );
     }
 
@@ -80,6 +72,7 @@ public class CartService {
         cart.setId(UUID.randomUUID());
         cart.setCreatedAt(now);
         cart.setUpdatedAt(now);
+        cart.setCurrency(null);
 
         cartRepo.save(cart);
 
@@ -93,6 +86,17 @@ public class CartService {
 
         Product p = prodRepo.findById(dto.productId())
                 .orElseThrow(() -> new NotFoundException("Product not found: " +dto.productId()));
+
+        String productCurrency = p.getCurrency();
+
+        if (cart.getCurrency() == null) {
+            cart.setCurrency(productCurrency);
+        } else if (!cart.getCurrency().equalsIgnoreCase(productCurrency)) {
+            throw new IllegalArgumentException("Cart currency mismatch");
+        }
+
+        cart.setUpdatedAt(OffsetDateTime.now());
+        cartRepo.save(cart);
 
         int addQty = dto.quantity();
         int availableQty = p.getQuantityAvailable();
@@ -166,8 +170,11 @@ public class CartService {
         }
 
         itemRepo.deleteById(itemId);
-
+        if (itemRepo.findByCartId(cartId).isEmpty()) {
+            cart.setCurrency(null);
+        }
         cart.setUpdatedAt(OffsetDateTime.now());
+
         cartRepo.save(cart);
 
         return view(cartId);
