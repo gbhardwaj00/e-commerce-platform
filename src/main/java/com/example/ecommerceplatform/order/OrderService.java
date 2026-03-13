@@ -63,9 +63,16 @@ public class OrderService {
             throw new IllegalArgumentException("Cannot checkout an empty cart");
         }
 
-        Map<UUID, Product> productsById = productRepository.findAllById(
-                cartItems.stream().map(CartItem::getProductId).toList()
-        ).stream().collect(Collectors.toMap(Product::getId, p -> p));
+        List<UUID> productIds =  cartItems.stream()
+                .map(CartItem::getProductId)
+                .distinct()
+                .sorted()
+                .toList();
+
+
+        Map<UUID, Product> productsById = productRepository.findAllByIdInForUpdate(productIds)
+                .stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
 
         UUID orderId = UUID.randomUUID();
         OffsetDateTime now = OffsetDateTime.now();
@@ -77,6 +84,14 @@ public class OrderService {
         for (CartItem ci : cartItems) {
             Product p = productsById.get(ci.getProductId());
             if (p == null) throw new NotFoundException("Product not found: " + ci.getProductId());
+
+            // check stock
+            int reqQty = ci.getQuantity();
+            if (p.getQuantityAvailable() < reqQty) {
+                throw new IllegalArgumentException("Insufficient stock for product: " + p.getId());
+            } else { // update new inventory
+                p.setQuantityAvailable(p.getQuantityAvailable() - reqQty);
+            }
 
             int line = p.getPriceCents() * ci.getQuantity();
             total += line;
@@ -94,6 +109,9 @@ public class OrderService {
             orderItems.add(oi);
         }
 
+        // persist the products with new qty in inventory
+        productRepository.saveAll(productsById.values());
+
         Order order = new Order();
         order.setId(orderId);
         order.setCartId(cartId);
@@ -105,6 +123,10 @@ public class OrderService {
 
         orderRepo.save(order);
         itemRepo.saveAll(orderItems);
+        cartItemRepository.deleteByCartId(cartId);
+        cart.setCurrency(null);
+        cart.setUpdatedAt(now);
+        cartRepository.save(cart);
         
         return toDTO(order, orderItems);
     }
