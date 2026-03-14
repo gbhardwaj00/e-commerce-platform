@@ -9,10 +9,13 @@ import com.example.ecommerceplatform.catalog.product.ProductRepository;
 import com.example.ecommerceplatform.common.NotFoundException;
 import com.example.ecommerceplatform.order.dto.OrderItemResponseDTO;
 import com.example.ecommerceplatform.order.dto.OrderResponseDTO;
+import com.example.ecommerceplatform.order.dto.OrderSummaryDTO;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Pageable;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -152,5 +155,18 @@ public class OrderService {
                 order.getCreatedAt(),
                 dtoItems
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OrderSummaryDTO> list(Pageable pageable) {
+        return orderRepo.findAll(pageable).map(o -> new OrderSummaryDTO(
+                o.getId(),
+                o.getCartId(),
+                o.getStatus(),
+                o.getCurrency(),
+                o.getTotalCents(),
+                o.getCreatedAt()
+        ));
+
     }
 }
