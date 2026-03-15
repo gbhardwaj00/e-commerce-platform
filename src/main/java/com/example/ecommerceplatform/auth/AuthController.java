@@ -1,6 +1,8 @@
 package com.example.ecommerceplatform.auth;
 
-import com.example.ecommerceplatform.user.dto.RegisterRequestDTO;
+import com.example.ecommerceplatform.auth.dto.AuthResponseDTO;
+import com.example.ecommerceplatform.auth.dto.LoginRequestDTO;
+import com.example.ecommerceplatform.auth.dto.RegisterRequestDTO;
 import com.example.ecommerceplatform.user.dto.UserResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,5 +21,10 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponseDTO register(@RequestBody @Valid RegisterRequestDTO dto) {
         return authService.register(dto);
+    }
+
+    @GetMapping("/login")
+    public AuthResponseDTO login(@RequestBody @Valid LoginRequestDTO dto) {
+        return authService.login(dto);
     }
 }
