@@ -18,10 +18,12 @@ import java.util.UUID;
 public class AuthService {
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepo, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepo, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Transactional
@@ -66,7 +68,7 @@ public class AuthService {
         }
 
         return new AuthResponseDTO(
-                "temp-token",
+                jwtService.generateToken(user),
                 user.getId(),
                 user.getEmail(),
                 user.getRole()
