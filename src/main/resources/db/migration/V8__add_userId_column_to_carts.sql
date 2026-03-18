@@ -1,0 +1,9 @@
+ALTER TABLE carts
+ADD COLUMN userId UUID NOT NULL;
+
+ALTER TABLE carts
+ADD CONSTRAINT fk_carts_user
+FOREIGN KEY (userId) REFERENCES users(id);
+
+ALTER TABLE carts
+ADD CONSTRAINT uq_carts_user UNIQUE (userId);
