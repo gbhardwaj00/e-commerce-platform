@@ -16,40 +16,31 @@ public class CartController {
         this.service = service;
     }
 
-    // View cart and items
-    @GetMapping("/{cartId}")
-    public CartDetailedViewDTO view(@PathVariable UUID cartId) {
-        return service.view(cartId);
-    }
-
-    // create a new cart
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CartCreateResponseDTO create() {
-        return service.create();
+    // Get my cart
+    @GetMapping
+    public CartDetailedViewDTO getCart() {
+        return service.getCurrentUserCart();
     }
 
     // add an item to the cart
-    @PostMapping("/{cartId}/items")
+    @PostMapping("/items")
     @ResponseStatus(HttpStatus.OK)
-    public CartDetailedViewDTO addItem(@PathVariable UUID cartId, @Valid @RequestBody AddCartItemRequestDTO req) {
-        return service.addItem(cartId, req);
+    public CartDetailedViewDTO addItem(@Valid @RequestBody AddCartItemRequestDTO req) {
+        return service.addItem(req);
     }
 
-    @PutMapping("/{cartId}/items/{prodId}")
+    @PutMapping("/items/{prodId}")
     @ResponseStatus(HttpStatus.OK)
     public CartDetailedViewDTO setQuantity(
-            @PathVariable UUID cartId,
             @PathVariable UUID prodId,
             @Valid @RequestBody UpdateCartItemRequestDTO dto) {
-        return service.setItemQuantity(cartId, prodId, dto);
+        return service.setItemQuantity(prodId, dto);
     }
 
-    @DeleteMapping("/{cartId}/items/{prodId}")
+    @DeleteMapping("/items/{prodId}")
     public CartDetailedViewDTO removeItem(
-        @PathVariable UUID cartId,
         @PathVariable UUID prodId
     ) {
-        return service.removeItem(cartId, prodId);
+        return service.removeItem(prodId);
     }
 }

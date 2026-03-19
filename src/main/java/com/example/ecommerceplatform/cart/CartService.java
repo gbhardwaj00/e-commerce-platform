@@ -1,9 +1,11 @@
 package com.example.ecommerceplatform.cart;
 
+import com.example.ecommerceplatform.auth.CurrentUserService;
 import com.example.ecommerceplatform.cart.dto.*;
 import com.example.ecommerceplatform.catalog.product.Product;
 import com.example.ecommerceplatform.catalog.product.ProductRepository;
 import com.example.ecommerceplatform.common.NotFoundException;
+import com.example.ecommerceplatform.user.User;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,22 +19,22 @@ public class CartService {
     private final CartRepository cartRepo;
     private final CartItemRepository itemRepo;
     private final ProductRepository prodRepo;
+    private final CurrentUserService currentUserService;
 
-    public CartService(CartRepository cartRepo, CartItemRepository itemRepo, ProductRepository prodRepo) {
+    public CartService(CartRepository cartRepo, CartItemRepository itemRepo, ProductRepository prodRepo, CurrentUserService currentUserService) {
         this.cartRepo = cartRepo;
         this.itemRepo = itemRepo;
         this.prodRepo = prodRepo;
+        this.currentUserService = currentUserService;
     }
+    @Transactional
+    public CartDetailedViewDTO getCurrentUserCart() {
+        Cart cart = getOrCreateCartForCurrentUser();
 
-    @Transactional(readOnly = true)
-    public CartDetailedViewDTO view(UUID cartId) {
-        Cart cart = cartRepo.findById(cartId)
-                .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
-
-        List<CartItem> cartItems = itemRepo.findByCartId(cartId);
+        List<CartItem> cartItems = itemRepo.findByCartId(cart.getId());
 
         Map<UUID, Product> productsById = prodRepo.findAllById(
-                cartItems.stream().map(CartItem::getProductId).toList())
+                        cartItems.stream().map(CartItem::getProductId).distinct().toList())
                 .stream().collect(Collectors.toMap(Product::getId, p->p));
 
         List<CartItemDetailedDTO> items = new ArrayList<>();
@@ -64,28 +66,27 @@ public class CartService {
         );
     }
 
-    @Transactional
-    public CartCreateResponseDTO create() {
-        var now = OffsetDateTime.now();
+    private Cart getOrCreateCartForCurrentUser() {
+        User user = currentUserService.getCurrentUser();
 
-        Cart cart = new Cart();
-        cart.setId(UUID.randomUUID());
-        cart.setCreatedAt(now);
-        cart.setUpdatedAt(now);
-        cart.setCurrency(null);
-
-        cartRepo.save(cart);
-
-        return new CartCreateResponseDTO(cart.getId());
+        return cartRepo.findByUserId(user.getId())
+                .orElseGet(() -> {
+                    Cart cart = new Cart();
+                    cart.setId(UUID.randomUUID());
+                    cart.setUser(user);
+                    cart.setCurrency(null);
+                    cart.setCreatedAt(OffsetDateTime.now());
+                    cart.setUpdatedAt(OffsetDateTime.now());
+                    return cartRepo.save(cart);
+                });
     }
 
     @Transactional
-    public CartDetailedViewDTO addItem(UUID cartId, @Valid AddCartItemRequestDTO dto) {
-        Cart cart = cartRepo.findById(cartId)
-                .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
+    public CartDetailedViewDTO addItem(@Valid AddCartItemRequestDTO dto) {
+        Cart cart = getOrCreateCartForCurrentUser();
 
         Product p = prodRepo.findById(dto.productId())
-                .orElseThrow(() -> new NotFoundException("Product not found: " +dto.productId()));
+                .orElseThrow(() -> new NotFoundException("Product not found: " + dto.productId()));
 
         String productCurrency = p.getCurrency();
 
@@ -101,40 +102,37 @@ public class CartService {
         int addQty = dto.quantity();
         int availableQty = p.getQuantityAvailable();
 
-        CartItemId id = new CartItemId(cartId, p.getId());
-        CartItem item = itemRepo.findById(id).orElseGet(() -> {
-            CartItem ci = new CartItem();
-            ci.setCartId(cartId);
-            ci.setProductId(p.getId());
-            ci.setCreatedAt(OffsetDateTime.now());
-            ci.setQuantity(0);
-            return ci;
-        });
+        CartItemId id = new CartItemId(cart.getId(), p.getId());
+        CartItem item = itemRepo.findById(id)
+                .orElseGet(() -> {
+                    CartItem ci = new CartItem();
+                    ci.setCartId(cart.getId());
+                    ci.setProductId(p.getId());
+                    ci.setCreatedAt(OffsetDateTime.now());
+                    ci.setQuantity(0);
+                    return ci;
+                });
 
         int newQty = item.getQuantity() + addQty;
 
-        if(newQty > availableQty) {
+        if (newQty > availableQty) {
             throw new IllegalArgumentException("Requested quantity exceeds available stock");
         }
         item.setQuantity(newQty);
         item.setUpdatedAt(OffsetDateTime.now());
         itemRepo.save(item);
 
-        cart.setUpdatedAt(OffsetDateTime.now());
-        cartRepo.save(cart);
-
-        return view(cartId);
+        return getCurrentUserCart();
     }
 
     @Transactional
-    public CartDetailedViewDTO setItemQuantity(UUID cartId, UUID prodId, @Valid UpdateCartItemRequestDTO dto) {
-        Cart cart = cartRepo.findById(cartId)
-                .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
+    public CartDetailedViewDTO setItemQuantity(UUID prodId, @Valid UpdateCartItemRequestDTO dto) {
+        Cart cart = getOrCreateCartForCurrentUser();
 
         Product product = prodRepo.findById(prodId)
                 .orElseThrow(() -> new NotFoundException("Product not found: " + prodId));
 
-        CartItemId itemId = new CartItemId(cartId, prodId);
+        CartItemId itemId = new CartItemId(cart.getId(), prodId);
         CartItem item = itemRepo.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Cart item not found for product: " + prodId));
 
@@ -152,31 +150,31 @@ public class CartService {
         cart.setUpdatedAt(OffsetDateTime.now());
         cartRepo.save(cart);
 
-        return view(cartId);
+        return getCurrentUserCart();
     }
 
     @Transactional
-    public CartDetailedViewDTO removeItem(UUID cartId, UUID prodId) {
-        Cart cart = cartRepo.findById(cartId)
-                .orElseThrow(() -> new NotFoundException("Cart not found: " + cartId));
+    public CartDetailedViewDTO removeItem(UUID prodId) {
+        Cart cart = getOrCreateCartForCurrentUser();
 
         if (!prodRepo.existsById(prodId)) {
             throw new NotFoundException("Product not found: " + prodId);
         }
 
-        CartItemId itemId = new CartItemId(cartId, prodId);
+        CartItemId itemId = new CartItemId(cart.getId(), prodId);
         if (!itemRepo.existsById(itemId)) {
             throw new NotFoundException("Cart item not found for product: " + prodId);
         }
 
         itemRepo.deleteById(itemId);
-        if (itemRepo.findByCartId(cartId).isEmpty()) {
+        if (itemRepo.findByCartId(cart.getId()).isEmpty()) {
             cart.setCurrency(null);
         }
         cart.setUpdatedAt(OffsetDateTime.now());
 
         cartRepo.save(cart);
 
-        return view(cartId);
+        return getCurrentUserCart();
     }
+
 }
