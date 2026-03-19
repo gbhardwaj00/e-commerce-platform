@@ -1,9 +1,8 @@
 package com.example.ecommerceplatform.cart;
 
+import com.example.ecommerceplatform.user.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -25,6 +24,18 @@ public class Cart {
 
     @Column(length = 3)
     private String currency;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     protected Cart() {}
 

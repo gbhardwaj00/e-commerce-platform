@@ -1,0 +1,1 @@
+ALTER TABLE carts RENAME COLUMN userId TO user_id;
