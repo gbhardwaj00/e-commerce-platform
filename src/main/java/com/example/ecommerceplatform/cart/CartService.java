@@ -7,6 +7,7 @@ import com.example.ecommerceplatform.catalog.product.ProductRepository;
 import com.example.ecommerceplatform.common.NotFoundException;
 import com.example.ecommerceplatform.user.User;
 import jakarta.validation.Valid;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +35,10 @@ public class CartService {
         List<CartItem> cartItems = itemRepo.findByCartId(cart.getId());
 
         Map<UUID, Product> productsById = prodRepo.findAllById(
-                        cartItems.stream().map(CartItem::getProductId).distinct().toList())
+                        cartItems.stream()
+                                .map(CartItem::getProductId)
+                                .distinct()
+                                .toList())
                 .stream().collect(Collectors.toMap(Product::getId, p->p));
 
         List<CartItemDetailedDTO> items = new ArrayList<>();
@@ -66,7 +70,7 @@ public class CartService {
         );
     }
 
-    private Cart getOrCreateCartForCurrentUser() {
+    private @NonNull Cart getOrCreateCartForCurrentUser() {
         User user = currentUserService.getCurrentUser();
 
         return cartRepo.findByUserId(user.getId())
@@ -82,7 +86,7 @@ public class CartService {
     }
 
     @Transactional
-    public CartDetailedViewDTO addItem(@Valid AddCartItemRequestDTO dto) {
+    public CartDetailedViewDTO addItem(@Valid @NonNull AddCartItemRequestDTO dto) {
         Cart cart = getOrCreateCartForCurrentUser();
 
         Product p = prodRepo.findById(dto.productId())
@@ -126,7 +130,7 @@ public class CartService {
     }
 
     @Transactional
-    public CartDetailedViewDTO setItemQuantity(UUID prodId, @Valid UpdateCartItemRequestDTO dto) {
+    public CartDetailedViewDTO setItemQuantity(UUID prodId, @Valid @NonNull UpdateCartItemRequestDTO dto) {
         Cart cart = getOrCreateCartForCurrentUser();
 
         Product product = prodRepo.findById(prodId)

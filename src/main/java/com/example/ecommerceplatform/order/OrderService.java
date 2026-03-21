@@ -1,5 +1,6 @@
 package com.example.ecommerceplatform.order;
 
+import com.example.ecommerceplatform.auth.CurrentUserService;
 import com.example.ecommerceplatform.cart.Cart;
 import com.example.ecommerceplatform.cart.CartItem;
 import com.example.ecommerceplatform.cart.CartItemRepository;
@@ -10,7 +11,7 @@ import com.example.ecommerceplatform.common.NotFoundException;
 import com.example.ecommerceplatform.order.dto.OrderItemResponseDTO;
 import com.example.ecommerceplatform.order.dto.OrderResponseDTO;
 import com.example.ecommerceplatform.order.dto.OrderSummaryDTO;
-import jakarta.validation.constraints.NotNull;
+import com.example.ecommerceplatform.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,54 +27,43 @@ import java.util.stream.Collectors;
 @Service
 public class OrderService {
     private final OrderRepository orderRepo;
-    private final OrderItemRepository itemRepo;
+    private final OrderItemRepository orderItemRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
+    private final CurrentUserService currentUserService;
 
     public OrderService(OrderRepository orderRepo,
-                        OrderItemRepository itemRepo,
+                        OrderItemRepository orderItemRepository,
                         CartRepository cartRepository,
                         CartItemRepository cartItemRepository,
-                        ProductRepository productRepository) {
+                        ProductRepository productRepository,
+                        CurrentUserService currentUserService) {
         this.orderRepo = orderRepo;
-        this.itemRepo = itemRepo;
+        this.orderItemRepository = orderItemRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
+        this.currentUserService = currentUserService;
     }
 
 
-    @Transactional(readOnly = true)
-    public OrderResponseDTO get(UUID orderId) {
-        Order order = orderRepo.findById(orderId)
-                .orElseThrow(() -> new NotFoundException("Order not found: " + orderId));
-
-        List<OrderItem> items = itemRepo.findByOrderId(orderId);
-
-        return toDTO(order, items);
-    }
 
     @Transactional
-    public OrderResponseDTO checkout(@NotNull UUID cartId) {
-        Cart cart = cartRepository.findById(cartId).orElseThrow(
-                () -> new NotFoundException("Cart not found: " + cartId)
-        );
+    public OrderResponseDTO checkout() {
+        User user = currentUserService.getCurrentUser();
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(() ->  new NotFoundException("Cart not found"));
 
-        List<CartItem> cartItems = cartItemRepository.findByCartId(cartId);
-
-        if (cartItems.isEmpty()) {
+        List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+        if(cartItems.isEmpty()) {
             throw new IllegalArgumentException("Cannot checkout an empty cart");
         }
 
-        List<UUID> productIds =  cartItems.stream()
-                .map(CartItem::getProductId)
-                .distinct()
-                .sorted()
-                .toList();
-
-
-        Map<UUID, Product> productsById = productRepository.findAllByIdInForUpdate(productIds)
+        Map<UUID, Product> productsById = productRepository.findAllByIdInForUpdate(cartItems.stream()
+                        .map(CartItem::getProductId)
+                        .distinct()
+                        .sorted().toList())
                 .stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
 
@@ -88,7 +78,7 @@ public class OrderService {
             Product p = productsById.get(ci.getProductId());
             if (p == null) throw new NotFoundException("Product not found: " + ci.getProductId());
 
-            // check stock
+            // Check Stock
             int reqQty = ci.getQuantity();
             if (p.getQuantityAvailable() < reqQty) {
                 throw new IllegalArgumentException("Insufficient stock for product: " + p.getId());
@@ -117,21 +107,48 @@ public class OrderService {
 
         Order order = new Order();
         order.setId(orderId);
-        order.setCartId(cartId);
+        order.setCartId(cart.getId());
         order.setCurrency(currency);
         order.setTotalCents(total);
         order.setStatus("CREATED");
         order.setCreatedAt(now);
         order.setUpdatedAt(now);
+        order.setUser(user);
 
         orderRepo.save(order);
-        itemRepo.saveAll(orderItems);
-        cartItemRepository.deleteByCartId(cartId);
+        orderItemRepository.saveAll(orderItems);
+        cartItemRepository.deleteByCartId(cart.getId());
         cart.setCurrency(null);
         cart.setUpdatedAt(now);
         cartRepository.save(cart);
-        
+
         return toDTO(order, orderItems);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderResponseDTO get(UUID orderId) {
+        User user = currentUserService.getCurrentUser();
+        Order order = orderRepo.findByIdAndUserId(orderId, user.getId())
+                .orElseThrow(() -> new NotFoundException("Order not found: " + orderId));
+
+        List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+
+        return toDTO(order, items);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OrderSummaryDTO> list(Pageable pageable) {
+        User user = currentUserService.getCurrentUser();
+
+        return orderRepo.findByUserId(user.getId(), pageable).map(o -> new OrderSummaryDTO(
+                o.getId(),
+                o.getCartId(),
+                o.getStatus(),
+                o.getCurrency(),
+                o.getTotalCents(),
+                o.getCreatedAt()
+        ));
+
     }
 
     private OrderResponseDTO toDTO(Order order, List<OrderItem> orderItems) {
@@ -155,18 +172,5 @@ public class OrderService {
                 order.getCreatedAt(),
                 dtoItems
         );
-    }
-
-    @Transactional(readOnly = true)
-    public Page<OrderSummaryDTO> list(Pageable pageable) {
-        return orderRepo.findAll(pageable).map(o -> new OrderSummaryDTO(
-                o.getId(),
-                o.getCartId(),
-                o.getStatus(),
-                o.getCurrency(),
-                o.getTotalCents(),
-                o.getCreatedAt()
-        ));
-
     }
 }
