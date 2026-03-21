@@ -1,5 +1,6 @@
 package com.example.ecommerceplatform.order;
 
+import com.example.ecommerceplatform.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -38,7 +39,20 @@ public class Order {
     @Column(nullable = false)
     private OffsetDateTime updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+
     protected Order() {}
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public UUID getId() {
         return id;

@@ -29,6 +29,7 @@ public class CartController {
         return service.addItem(req);
     }
 
+    // Set new quantity for a cart item
     @PutMapping("/items/{prodId}")
     @ResponseStatus(HttpStatus.OK)
     public CartDetailedViewDTO setQuantity(
@@ -37,6 +38,7 @@ public class CartController {
         return service.setItemQuantity(prodId, dto);
     }
 
+    // Delete cart item
     @DeleteMapping("/items/{prodId}")
     public CartDetailedViewDTO removeItem(
         @PathVariable UUID prodId
