@@ -164,12 +164,21 @@ Set database and JWT values in your local environment or `application.properties
 
 ## Future Improvements
 
-- Refresh token support
+This project is planned to evolve toward a more production-ready e-commerce system. Future improvements include:
+
+- Frontend application for customer and admin workflows
+- Refresh token support and stronger auth/session handling
 - Payment integration
-- Admin dashboard
+- Inventory and stock management
+- Search and filtering
+- Order history and user dashboard
+- Admin analytics and reporting
+- Redis caching
+- Message queues/event-driven workflows
 - CI/CD pipeline
-- Redis
-- Kafka
+- Cloud deployment
+- Monitoring and logging
+- Better test coverage for production-quality reliability
 
 ## Learning Goals
 
@@ -182,6 +191,7 @@ This project was built to practice production-style backend engineering concepts
 - Database migrations with Flyway
 - Containerized development with Docker
 - API documentation with Swagger
+- Designing backend systems with future production scaling in mind
 
 ## Author
 
