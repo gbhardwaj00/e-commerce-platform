@@ -171,6 +171,7 @@ This project is planned to evolve toward a more production-ready e-commerce syst
 - Payment integration
 - Inventory and stock management
 - Search and filtering
+- Elastisearch
 - Order history and user dashboard
 - Admin analytics and reporting
 - Redis caching
