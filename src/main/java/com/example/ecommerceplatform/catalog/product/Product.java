@@ -45,7 +45,7 @@ public class Product {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
-    protected Product() {}
+    public Product() {}
 
     public UUID getId() {
         return id;
