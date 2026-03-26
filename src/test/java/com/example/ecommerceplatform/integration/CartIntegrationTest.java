@@ -140,4 +140,69 @@ public class CartIntegrationTest {
                 .andExpect(jsonPath("$.totalCents").value(5998))
                 .andExpect(jsonPath("$.currency").value("USD"));
     }
+
+    @Test
+    void cannotAddQuantityMoreThanAvailable() throws Exception {
+        registerUser("cartUser3@example.com", "R@nd0mPa$$w0rd");
+        String token = loginAndGetToken("cartUser3@example.com", "R@nd0mPa$$w0rd");
+
+        UUID prodId = UUID.randomUUID();
+        Product p = new Product();
+        p.setId(prodId);
+        p.setTitle("29-inch Monitor");
+        p.setDescription("1440p IPS Monitor");
+        p.setPriceCents(34900);
+        p.setQuantityAvailable(5);
+        p.setCurrency("CAD");
+        p.setCreatedAt(OffsetDateTime.now());
+        p.setUpdatedAt(OffsetDateTime.now());
+        productRepository.save(p);
+
+        String addProdBoyd = """
+                {
+                    "productId" : "%s",
+                    "quantity" : 7
+                }
+                """.formatted(prodId);
+
+        mockMvc.perform(post("/api/v1/carts/items")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .content(addProdBoyd))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Requested quantity exceeds available stock"));
+
+    }
+
+    private String loginAndGetToken(String email, String password) throws Exception {
+        String loginBody = """
+                {
+                    "email": "%s",
+                    "password": "%s"
+                }
+                """.formatted(email, password);
+
+        MvcResult loginResult = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginBody))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        return JsonPath.read(loginResult.getResponse().getContentAsString(), "$.token");
+    }
+
+    private void registerUser(String email, String password) throws Exception {
+        String registerBody = """
+                {
+                    "email": "%s",
+                    "password": "%s"
+                }
+                """.formatted(email, password);
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(registerBody))
+                .andExpect(status().isCreated());
+
+    }
 }
