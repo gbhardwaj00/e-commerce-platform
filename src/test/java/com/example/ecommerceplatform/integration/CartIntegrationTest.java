@@ -2,11 +2,9 @@ package com.example.ecommerceplatform.integration;
 
 import com.example.ecommerceplatform.catalog.product.Product;
 import com.example.ecommerceplatform.catalog.product.ProductRepository;
-import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -21,33 +19,9 @@ public class CartIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void loginThenGetCartReturns200() throws Exception {
-        String registerBody = """
-                {
-                  "email": "cartuser@example.com",
-                  "password": "Password123"
-                }
-                """;
+        registerUser("cartuser@example.com", "Password123");
 
-        mockMvc.perform(post("/api/v1/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(registerBody))
-                .andExpect(status().isCreated());
-
-        String loginBody = """
-                {
-                    "email": "cartuser@example.com",
-                  "password": "Password123"
-                }
-                """;
-
-        MvcResult loginResult = mockMvc.perform(post("/api/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginBody))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String responseBody = loginResult.getResponse().getContentAsString();
-        String token = JsonPath.read(responseBody, "$.token");
+        String token = loginAndGetToken("cartuser@example.com", "Password123");
 
         mockMvc.perform(get("/api/v1/carts")
                 .header("Authorization", "Bearer " + token ))
@@ -70,35 +44,9 @@ public class CartIntegrationTest extends AbstractIntegrationTest {
 
         productRepository.save(product);
 
-        String registerBody = """
-                {
-                  "email": "cartuser2@example.com",
-                  "password": "Password123"
-                }
-                """;
+        registerUser( "cartuser2@example.com", "Password123");
 
-        mockMvc.perform(post("/api/v1/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(registerBody))
-                .andExpect(status().isCreated());
-
-        String loginBody = """
-                {
-                  "email": "cartuser2@example.com",
-                  "password": "Password123"
-                }
-                """;
-
-        MvcResult loginResult = mockMvc.perform(post("/api/v1/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(loginBody))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String token = JsonPath.read(
-                loginResult.getResponse().getContentAsString(),
-                "$.token"
-        );
+        String token = loginAndGetToken("cartuser2@example.com", "Password123");
 
         String addItemBody = """
                 {
@@ -139,7 +87,7 @@ public class CartIntegrationTest extends AbstractIntegrationTest {
         p.setUpdatedAt(OffsetDateTime.now());
         productRepository.save(p);
 
-        String addProdBoyd = """
+        String addProdBody = """
                 {
                     "productId" : "%s",
                     "quantity" : 7
@@ -149,7 +97,7 @@ public class CartIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(post("/api/v1/carts/items")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .content(addProdBoyd))
+                .content(addProdBody))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Requested quantity exceeds available stock"));
 
