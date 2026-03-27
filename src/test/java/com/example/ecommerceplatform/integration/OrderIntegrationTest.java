@@ -5,15 +5,8 @@ import com.example.ecommerceplatform.catalog.product.ProductRepository;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -22,19 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Testcontainers
-public class OrderIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgreSQLContainer =
-            new PostgreSQLContainer<>("postgres:16");
-
-    @Autowired
-    private MockMvc mockMvc;
-
+public class OrderIntegrationTest extends AbstractIntegrationTest{
     @Autowired
     private ProductRepository productRepository;
 
@@ -165,38 +146,5 @@ public class OrderIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Cannot checkout an empty cart"));
 
-    }
-
-
-
-    private String loginAndGetToken(String email, String password) throws Exception{
-        String body = """
-                {
-                  "email": "%s",
-                  "password": "%s"
-                }
-                """.formatted(email, password);
-
-        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        return JsonPath.read(result.getResponse().getContentAsString(), "$.token");
-    }
-
-    private void registerUser(String email, String password) throws Exception {
-        String registerReqBody = """
-                {
-                    "email" : "%s",
-                    "password" : "%s"
-                }
-                """.formatted(email, password);
-
-        mockMvc.perform(post("/api/v1/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(registerReqBody))
-                .andExpect(status().isCreated());
     }
 }

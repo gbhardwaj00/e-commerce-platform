@@ -5,15 +5,8 @@ import com.example.ecommerceplatform.catalog.product.ProductRepository;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -22,19 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Testcontainers
-public class CartIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgreSQLContainer =
-            new PostgreSQLContainer<>("postgres:16");
-
-    @Autowired
-    private MockMvc mockMvc;
-
+public class CartIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private ProductRepository productRepository;
 
@@ -171,38 +152,6 @@ public class CartIntegrationTest {
                 .content(addProdBoyd))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Requested quantity exceeds available stock"));
-
-    }
-
-    private String loginAndGetToken(String email, String password) throws Exception {
-        String loginBody = """
-                {
-                    "email": "%s",
-                    "password": "%s"
-                }
-                """.formatted(email, password);
-
-        MvcResult loginResult = mockMvc.perform(post("/api/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginBody))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        return JsonPath.read(loginResult.getResponse().getContentAsString(), "$.token");
-    }
-
-    private void registerUser(String email, String password) throws Exception {
-        String registerBody = """
-                {
-                    "email": "%s",
-                    "password": "%s"
-                }
-                """.formatted(email, password);
-
-        mockMvc.perform(post("/api/v1/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(registerBody))
-                .andExpect(status().isCreated());
 
     }
 }
