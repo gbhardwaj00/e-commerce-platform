@@ -6,6 +6,7 @@ import com.example.ecommerceplatform.user.Role;
 import com.example.ecommerceplatform.user.User;
 import com.example.ecommerceplatform.user.UserRepository;
 import com.example.ecommerceplatform.auth.dto.RegisterRequestDTO;
+import com.example.ecommerceplatform.common.AuthenticationFailedException;
 import com.example.ecommerceplatform.user.dto.UserResponseDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -59,12 +60,12 @@ public class AuthService {
         String normalizeEmail = dto.email().trim().toLowerCase();
 
         User user = userRepo.findByEmail(normalizeEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+                .orElseThrow(() -> new AuthenticationFailedException("Invalid email or password"));
 
         boolean matches = passwordEncoder.matches(dto.password(), user.getPasswordHash());
 
         if (!matches) {
-            throw new IllegalArgumentException("Invalid email or password");
+            throw new AuthenticationFailedException("Invalid email or password");
         }
 
         return new AuthResponseDTO(

@@ -37,6 +37,7 @@ public class ProductController {
 
     // CREATE
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ProductResponseDTO create(@Valid @RequestBody ProductCreateRequestDTO req) {
         return service.create(req);
     }
@@ -52,11 +53,5 @@ public class ProductController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
         service.delete(id);
-    }
-
-    // TEST Server Error
-    @GetMapping("/debug/boom")
-    public void boom() {
-        throw new RuntimeException("boom");
     }
 }

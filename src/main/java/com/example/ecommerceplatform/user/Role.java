@@ -1,5 +1,6 @@
 package com.example.ecommerceplatform.user;
 
 public enum Role {
-    USER
+    USER,
+    ADMIN
 }

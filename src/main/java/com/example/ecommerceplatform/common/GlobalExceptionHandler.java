@@ -69,4 +69,17 @@ public class GlobalExceptionHandler{
         null
         );
     }
+
+    @ExceptionHandler(AuthenticationFailedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponseDTO handleAuthenticationFailed(AuthenticationFailedException ex, HttpServletRequest req) {
+        return new ErrorResponseDTO(
+                OffsetDateTime.now(),
+                401,
+                "Unauthorized",
+                ex.getMessage(),
+                req.getRequestURI(),
+                null
+        );
+    }
 }

@@ -24,7 +24,7 @@ public class CartController {
 
     // add an item to the cart
     @PostMapping("/items")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     public CartDetailedViewDTO addItem(@Valid @RequestBody AddCartItemRequestDTO req) {
         return service.addItem(req);
     }
