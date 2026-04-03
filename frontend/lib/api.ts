@@ -12,7 +12,6 @@ type ApiFetchOptions = {
     method?: string;
     body?: unknown;
     token?: string;
-    /** Pass through to `fetch` (e.g. `no-store` in Next.js server components). */
     cache?: RequestCache;
 };
 

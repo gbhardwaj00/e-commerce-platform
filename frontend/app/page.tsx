@@ -1,30 +1,11 @@
 import { apiFetch } from "@/lib/api";
-
-interface Product {
-    id: string;
-    title: string;
-    description: string;
-    priceCents: number;
-    currency: string;
-    quantityAvailable: number;
-}
-
-type ProductPage = {
-    items: Product[];
-    page: number;
-    size: number;
-    totalItems: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrevious: boolean;
-    sort: string[];
-};
+import type {Product, ProductPage} from "@/lib/types/api";
 
 export default async function Home() {
-    const data = await apiFetch<ProductPage>("/api/v1/products?size=50", {
+    const data: ProductPage = await apiFetch<ProductPage>("/api/v1/products?size=50", {
         cache: "no-store",
     });
-    const productsArray = data.items;
+    const productsArray: Product[] = data.items;
 
     return (
         <main className="min-h-screen bg-gray-50 p-8">
