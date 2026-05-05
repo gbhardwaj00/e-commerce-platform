@@ -10,8 +10,8 @@ export default function NavBar() {
                 <div>
                     <a className="hover:text-blue-600 font-medium mr-4" href="/products">Products</a>
                     <a className="hover:text-blue-600 font-medium mr-4" href="/cart">Cart</a>
-                    <a className="bg-blue-600 text-white px-4 py-2 rounded-md mr-2" href="/login">Login</a>
-                    <a className="bg-blue-600 text-white px-4 py-2 rounded-md" href="/register">Register</a>
+                    <a className="bg-blue-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-blue-700 transition-colors" href="/login">Login</a>
+                    <a className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors" href="/register">Register</a>
                 </div>
             </div>
         </nav>
