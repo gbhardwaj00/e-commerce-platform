@@ -1,8 +1,8 @@
 FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 
-COPY gradlew .
-COPY gradle gradle
+COPY gradlew ./
+COPY gradle/ gradle/
 COPY build.gradle* settings.gradle* ./
 RUN chmod +x gradlew
 
