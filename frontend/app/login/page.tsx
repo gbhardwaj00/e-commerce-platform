@@ -3,8 +3,9 @@
 import {useState} from "react";
 import {useRouter} from "next/navigation";
 import {apiFetch} from "@/lib/api";
+import {AuthResponse} from "@/lib/types/api";
 
-export default function RegisterPage() {
+export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -13,13 +14,14 @@ export default function RegisterPage() {
     async function handleSubmit() {
         setError("");
         try {
-            await apiFetch("/api/v1/auth/register", {
+            const response: AuthResponse = await apiFetch<AuthResponse>("/api/v1/auth/login", {
                 method: "POST",
                 body: {email, password}
             });
-            router.push("/login")
+            localStorage.setItem('token', response.token)
+            router.push("/products")
         } catch (e: any) {
-            let errorMsg = "Registration failed";
+            let errorMsg = "Login failed";
 
             if (e.message) {
                 try {
@@ -49,7 +51,7 @@ export default function RegisterPage() {
                 }}
                       className="bg-white shadow-md max-w-md p-8 w-full rounded-lg">
                     {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-                    <h1 className="text-2xl font-semibold mb-2">Register</h1>
+                    <h1 className="text-2xl font-semibold mb-2">Login</h1>
                     <input type="email" className="border-gray-300 border-2 w-full p-2 mb-4 rounded-md"
                            onChange={(e) => setEmail(e.target.value)} value={email}
                            placeholder="Email"/>
@@ -60,7 +62,7 @@ export default function RegisterPage() {
                             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors w-full">Submit
                     </button>
                     <p className="text-sm mt-4">
-                        Already have an account? <a href="/login" className="text-blue-600 hover:underline">Login</a>
+                        Don't have an account? <a href="/register" className="text-blue-600 hover:underline">Register</a>
                     </p>
                 </form>
             </main>
