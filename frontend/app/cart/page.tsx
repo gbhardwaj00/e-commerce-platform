@@ -20,7 +20,7 @@ export default function CartPage() {
             }
             try {
                 const response = await apiFetch<CartDetailedView>("/api/v1/carts", {
-                    "token": token,
+                    token: token,
                 })
                 setCart(response);
             } catch (e) {
@@ -36,6 +36,48 @@ export default function CartPage() {
 
     if (loading) return <div className="max-w-7xl mx-auto p-8"><p>Loading...</p></div>;
     if (error) return <div className="max-w-7xl mx-auto p-8"><p className="text-red-600">{error}</p></div>;
+
+    async function removeItem(productId: string) {
+        const token = localStorage.getItem("token");
+        try {
+            const response = await apiFetch<CartDetailedView>(
+                `/api/v1/carts/items/${productId}`, {
+                    method: 'DELETE',
+                    token: token!
+                }
+            );
+            setCart(response)
+        } catch (e) {
+            console.log("Failed to remove item", e);
+        }
+    }
+
+    async function updateQuantity(newQuantity: number, productId: string) {
+        if (newQuantity < 1) return;
+        const token = localStorage.getItem("token");
+        try {
+            const response = await apiFetch<CartDetailedView>(
+                `/api/v1/carts/items/${productId}`, {
+                    method: 'PUT',
+                    token: token!,
+                    body: {
+                        newQuantity
+                    }
+                }
+            );
+            setCart(response)
+        } catch (e: any) {
+            console.error("Failed to update quantity", e);
+            let errorMsg = "Failed to update quantity";
+            try {
+                const parsed = JSON.parse(e.message);
+                errorMsg = parsed.message || errorMsg;
+            } catch {
+                errorMsg = e.message || errorMsg;
+            }
+            alert(errorMsg);
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -62,19 +104,27 @@ export default function CartPage() {
                     <>
                         <div className="bg-white rounded-lg shadow-sm divide-y">
                             {cart?.items.map(item => (
-                                <div key={item.productId} className="p-6 grid grid-cols-[1fr_auto_120px] gap-8 items-center">
+                                <div key={item.productId} className="p-6 grid grid-cols-[1fr_auto_120px_auto] gap-8 items-center">
                                     <div>
                                         <h3 className="font-semibold text-lg">{item.title}</h3>
                                         <p className="text-gray-600">${(item.priceCents / 100).toFixed(2)}</p>
                                     </div>
                                     <div className="flex items-center gap-4">
-                                        <button className="px-3 py-1 border rounded">-</button>
+                                        <button
+                                            onClick={() => updateQuantity(item.quantity - 1, item.productId)}
+                                            className="px-3 py-1 border rounded">-</button>
                                         <span className="w-8 text-center">{item.quantity}</span>
-                                        <button className="px-3 py-1 border rounded">+</button>
+                                        <button className="px-3 py-1 border rounded"
+                                                onClick={() => updateQuantity(item.quantity + 1, item.productId)}>+</button>
                                     </div>
                                     <div className="text-right">
                                         <p className="font-semibold">${(item.lineTotalCents / 100).toFixed(2)}</p>
                                     </div>
+                                    <button onClick={() => removeItem(item.productId)}
+                                        className="text-red-600 hover:text-red-700 font-medium"
+                                    >
+                                        Remove
+                                    </button>
                                 </div>
                             ))}
                         </div>
