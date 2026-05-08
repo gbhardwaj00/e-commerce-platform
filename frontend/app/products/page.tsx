@@ -3,6 +3,7 @@
 import {useEffect, useState} from "react";
 import {apiFetch} from "@/lib/api";
 import {Product, ProductPage} from "@/lib/types/api";
+import {useRouter} from "next/navigation";
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -11,6 +12,8 @@ export default function ProductsPage() {
     const [totalPages, setTotalPages] = useState(0);
     const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
+    const [successMsg, setSuccessMsg] = useState("")
+    const router = useRouter();
 
     useEffect(() => {
         async function fetchProducts() {
@@ -24,8 +27,40 @@ export default function ProductsPage() {
                 setLoading(false);
             }
         }
+
         fetchProducts();
     }, [page, search]);
+
+
+    async function addItemToCart(productId: string) {
+        const token = localStorage.getItem("token");
+        if(!token) {
+            router.push("/login");
+            return;
+        }
+        try {
+            await apiFetch(`/api/v1/carts/items`, {
+                method: 'POST',
+                token: token!,
+                body: {
+                    productId,
+                    quantity: 1
+                }
+            })
+            setSuccessMsg("Item added to cart!");
+            setTimeout(() => setSuccessMsg(""), 3000);
+        } catch (e: any) {
+            console.error("Failed to add to cart:", e);
+            let errorMsg = "Failed to add item";
+            try {
+                const parsed = JSON.parse(e.message);
+                errorMsg = parsed.message || errorMsg;
+            } catch {
+                errorMsg = e.message || errorMsg;
+            }
+            alert(errorMsg);
+        }
+    }
 
     if (loading) return <div className="max-w-7xl mx-auto p-8">Loading...</div>;
 
@@ -46,6 +81,11 @@ export default function ProductsPage() {
                     Search
                 </button>
             </div>
+            {successMsg && (
+                <div className="bg-green-100 text-green-800 p-3 rounded mb-4">
+                    {successMsg}
+                </div>
+            )}
             {products.length === 0 ? (
                 <div className="text-center py-20 text-gray-600">
                     No products found{search && ` for "${search}"`}
@@ -56,6 +96,12 @@ export default function ProductsPage() {
                         <div key={product.id} className="border rounded p-4">
                             <h2 className="font-semibold">{product.title}</h2>
                             <p>${(product.priceCents / 100).toFixed(2)}</p>
+                            <button
+                                className="w-full bg-blue-600 py-2 px-4 text-white rounded mt-2 hover:bg-blue-700 transition-colors"
+                                onClick={() => addItemToCart(product.id)}
+                            >
+                                Add to Cart
+                            </button>
                         </div>
                     ))}
                 </div>

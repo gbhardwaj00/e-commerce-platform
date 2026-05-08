@@ -55,7 +55,7 @@ public class OrderService {
         Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() ->  new NotFoundException("Cart not found"));
 
-        List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+        List<CartItem> cartItems = cartItemRepository.findByCartIdOrderByCreatedAtAsc(cart.getId());
         if(cartItems.isEmpty()) {
             throw new IllegalArgumentException("Cannot checkout an empty cart");
         }

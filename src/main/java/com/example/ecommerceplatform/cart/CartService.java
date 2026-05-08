@@ -32,7 +32,7 @@ public class CartService {
     public CartDetailedViewDTO getCurrentUserCart() {
         Cart cart = getOrCreateCartForCurrentUser();
 
-        List<CartItem> cartItems = itemRepo.findByCartId(cart.getId());
+        List<CartItem> cartItems = itemRepo.findByCartIdOrderByCreatedAtAsc(cart.getId());
 
         Map<UUID, Product> productsById = prodRepo.findAllById(
                         cartItems.stream()
@@ -171,7 +171,7 @@ public class CartService {
         }
 
         itemRepo.deleteById(itemId);
-        if (itemRepo.findByCartId(cart.getId()).isEmpty()) {
+        if (itemRepo.findByCartIdOrderByCreatedAtAsc(cart.getId()).isEmpty()) {
             cart.setCurrency(null);
         }
         cart.setUpdatedAt(OffsetDateTime.now());

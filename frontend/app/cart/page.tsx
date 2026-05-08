@@ -34,8 +34,6 @@ export default function CartPage() {
         fetchCartItems();
     }, []);
 
-    if (loading) return <div className="max-w-7xl mx-auto p-8"><p>Loading...</p></div>;
-    if (error) return <div className="max-w-7xl mx-auto p-8"><p className="text-red-600">{error}</p></div>;
 
     async function removeItem(productId: string) {
         const token = localStorage.getItem("token");
@@ -79,6 +77,9 @@ export default function CartPage() {
         }
     }
 
+    if (loading) return <div className="max-w-7xl mx-auto p-8"><p>Loading...</p></div>;
+    if (error) return <div className="max-w-7xl mx-auto p-8"><p className="text-red-600">{error}</p></div>;
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-4xl mx-auto px-4 py-12">
@@ -112,9 +113,9 @@ export default function CartPage() {
                                     <div className="flex items-center gap-4">
                                         <button
                                             onClick={() => updateQuantity(item.quantity - 1, item.productId)}
-                                            className="px-3 py-1 border rounded">-</button>
+                                            className="px-3 py-1 border rounded hover:bg-gray-100 transition-colors">-</button>
                                         <span className="w-8 text-center">{item.quantity}</span>
-                                        <button className="px-3 py-1 border rounded"
+                                        <button className="px-3 py-1 border rounded hover:bg-gray-100 transition-colors"
                                                 onClick={() => updateQuantity(item.quantity + 1, item.productId)}>+</button>
                                     </div>
                                     <div className="text-right">
@@ -135,7 +136,8 @@ export default function CartPage() {
                                     ${((cart?.totalCents || 0) / 100).toFixed(2)}
                                 </span>
                             </div>
-                            <button className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                            <button className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                                onClick={() => router.push("/orders/checkout")}>
                                 Proceed to Checkout
                             </button>
                         </div>
