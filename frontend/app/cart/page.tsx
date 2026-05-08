@@ -30,6 +30,7 @@ export default function CartPage() {
                 setLoading(false);
             }
         }
+
         fetchCartItems();
     }, []);
 
@@ -37,7 +38,7 @@ export default function CartPage() {
     if (error) return <div className="max-w-7xl mx-auto p-8"><p className="text-red-600">{error}</p></div>;
 
     return (
-        <div className="min-h-screen bg-gray-50 text-center">
+        <div className="min-h-screen bg-gray-50">
             <div className="max-w-4xl mx-auto px-4 py-12">
                 <h1 className="text-4xl font-bold mb-12 text-gray-900">Shopping Cart</h1>
 
@@ -58,9 +59,37 @@ export default function CartPage() {
                         </a>
                     </div>
                 ) : (
-                    <div>
-
-                    </div>
+                    <>
+                        <div className="bg-white rounded-lg shadow-sm divide-y">
+                            {cart?.items.map(item => (
+                                <div key={item.productId} className="p-6 grid grid-cols-[1fr_auto_120px] gap-8 items-center">
+                                    <div>
+                                        <h3 className="font-semibold text-lg">{item.title}</h3>
+                                        <p className="text-gray-600">${(item.priceCents / 100).toFixed(2)}</p>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <button className="px-3 py-1 border rounded">-</button>
+                                        <span className="w-8 text-center">{item.quantity}</span>
+                                        <button className="px-3 py-1 border rounded">+</button>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-semibold">${(item.lineTotalCents / 100).toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <span className="text-xl font-semibold">Total</span>
+                                <span className="text-2xl font-bold text-blue-600">
+                                    ${((cart?.totalCents || 0) / 100).toFixed(2)}
+                                </span>
+                            </div>
+                            <button className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                Proceed to Checkout
+                            </button>
+                        </div>
+                    </>
                 )}
             </div>
         </div>
