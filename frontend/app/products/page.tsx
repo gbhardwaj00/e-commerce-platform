@@ -93,11 +93,12 @@ export default function ProductsPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {products.map(product => (
-                        <div key={product.id} className="border rounded p-4">
-                            <h2 className="font-semibold">{product.title}</h2>
-                            <p>${(product.priceCents / 100).toFixed(2)}</p>
+                        <div key={product.id}
+                             className="border rounded p-4 flex flex-col">
+                            <h2 className="font-semibold mb-2">{product.title}</h2>
+                            <p className="mb-4">${(product.priceCents / 100).toFixed(2)}</p>
                             <button
-                                className="w-full bg-blue-600 py-2 px-4 text-white rounded mt-2 hover:bg-blue-700 transition-colors"
+                                className="w-full bg-blue-600 py-2 px-4 text-white rounded mt-auto hover:bg-blue-700 transition-colors"
                                 onClick={() => addItemToCart(product.id)}
                             >
                                 Add to Cart
