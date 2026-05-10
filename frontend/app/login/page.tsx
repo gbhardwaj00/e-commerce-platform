@@ -4,8 +4,10 @@ import {useState} from "react";
 import {useRouter} from "next/navigation";
 import {apiFetch} from "@/lib/api";
 import {AuthResponse} from "@/lib/types/api";
+import {useAuth} from "@/contexts/AuthContext";
 
 export default function LoginPage() {
+    const {login} = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -18,7 +20,7 @@ export default function LoginPage() {
                 method: "POST",
                 body: {email, password}
             });
-            localStorage.setItem('token', response.token)
+            login(response.token);
             router.push("/products")
         } catch (e: any) {
             let errorMsg = "Login failed";
