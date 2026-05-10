@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import {apiFetch} from "@/lib/api";
 import {Product, ProductPage} from "@/lib/types/api";
 import {useRouter} from "next/navigation";
+import {useAuth} from "@/contexts/AuthContext";
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -13,6 +14,7 @@ export default function ProductsPage() {
     const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
     const [successMsg, setSuccessMsg] = useState("")
+    const { refreshCartCount } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
@@ -47,6 +49,7 @@ export default function ProductsPage() {
                     quantity: 1
                 }
             })
+            refreshCartCount();
             setSuccessMsg("Item added to cart!");
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (e: any) {

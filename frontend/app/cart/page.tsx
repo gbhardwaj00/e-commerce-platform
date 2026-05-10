@@ -4,11 +4,13 @@ import {useState, useEffect} from "react";
 import {useRouter} from "next/navigation";
 import {apiFetch} from "@/lib/api";
 import {CartDetailedView} from "@/lib/types/api";
+import {useAuth} from "@/contexts/AuthContext";
 
 export default function CartPage() {
     const [cart, setCart] = useState<CartDetailedView | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("")
+    const { refreshCartCount } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
@@ -44,7 +46,8 @@ export default function CartPage() {
                     token: token!
                 }
             );
-            setCart(response)
+            setCart(response);
+            refreshCartCount();
         } catch (e) {
             console.log("Failed to remove item", e);
         }
@@ -64,6 +67,7 @@ export default function CartPage() {
                 }
             );
             setCart(response)
+            refreshCartCount();
         } catch (e: any) {
             console.error("Failed to update quantity", e);
             let errorMsg = "Failed to update quantity";

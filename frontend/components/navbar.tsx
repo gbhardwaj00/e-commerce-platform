@@ -3,7 +3,7 @@
 import {useAuth} from "@/contexts/AuthContext";
 
 export default function NavBar() {
-    const {isLoggedIn, logout, loading} = useAuth();
+    const {isLoggedIn, logout, loading, cartItemCount} = useAuth();
 
     if (loading) {
         return (
@@ -31,7 +31,14 @@ export default function NavBar() {
 
                     {isLoggedIn ? (
                         <>
-                            <a className="hover:text-blue-600 font-medium mr-4" href="/cart">Cart</a>
+                            <a className="hover:text-blue-600 relative font-medium mr-4" href="/cart">
+                                Cart
+                                {cartItemCount > 0 && (
+                                <span className="ml-1 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">
+            {cartItemCount}
+        </span>
+                            )}
+                            </a>
                             <a className="hover:text-blue-600 font-medium" href="/orders">My Orders</a>
                             <button
                                 onClick={logout}
