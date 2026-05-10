@@ -1,49 +1,89 @@
-# E-Commerce Platform Backend
+# Full-Stack E-Commerce Platform
 
-A secure and containerized backend for an e-commerce platform built with **Spring Boot**, **PostgreSQL**, **Flyway**, **Docker Compose**, and **Gradle**.
+A modern, full-stack e-commerce platform with a **Next.js/React** frontend and **Spring Boot** backend. Features secure authentication, shopping cart management, order processing, and a responsive user interface.
 
-This project includes **JWT authentication**, **role-based authorization**, **Swagger/OpenAPI documentation**, and core e-commerce features such as product management, cart handling, and order workflows.
+**Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS  
+**Backend**: Spring Boot 4.0.3, PostgreSQL, JWT Authentication, Swagger/OpenAPI
 
 ## Features
 
-- User registration and login
-- JWT-based authentication
-- Role-based authorization
-- Product management APIs
-- Cart management
-- Order and checkout workflows
-- Pagination support
+### Frontend (Next.js)
+- Modern, responsive UI with Tailwind CSS
+- User registration and login with JWT authentication
+- Product browsing with search and pagination
+- Shopping cart management (add, update quantities, remove items)
+- Checkout and order placement
+- Order history page with detailed order views
+- Dynamic navbar with authentication state
+- Client-side routing and navigation
+
+### Backend (Spring Boot)
+- RESTful API with comprehensive endpoints
+- JWT-based authentication and role-based authorization
+- Product management with search and pagination
+- Cart management with automatic calculations
+- Order processing and checkout workflows
 - Database migrations with Flyway
-- Swagger/OpenAPI API documentation
-- Fully containerized setup with Docker Compose
+- Swagger/OpenAPI documentation for API testing
+- Fully containerized with Docker Compose
+- PostgreSQL database with proper relationships
 
 ## Tech Stack
 
-- Java
-- Spring Boot
-- Spring Security
-- PostgreSQL
-- Flyway
-- Gradle
-- Docker Compose
-- Swagger / OpenAPI
-- JWT Authentication
+### Frontend
+- **Next.js 16** - React framework with App Router
+- **React 19** - UI library
+- **TypeScript** - Type-safe development
+- **Tailwind CSS 4** - Utility-first styling
+- **React Hooks** - Modern state management
+
+### Backend
+- **Java 17** - Programming language
+- **Spring Boot 4.0.3** - Application framework
+- **Spring Security** - Authentication & authorization
+- **PostgreSQL** - Relational database
+- **Flyway** - Database migrations
+- **Gradle** - Build automation
+- **JWT** - Token-based authentication
+- **Swagger/OpenAPI** - API documentation
+
+### DevOps
+- **Docker Compose** - Container orchestration
+- **Git** - Version control
 
 ## Project Structure
 
-    src/
-    └── main/
-        ├── java/com/example/ecommerceplatform/
-        │   ├── auth/
-        │   ├── config/
-        │   ├── product/
-        │   ├── cart/
-        │   ├── order/
-        │   ├── user/
-        │   └── common/
-        └── resources/
-            ├── db/migration/
-            └── application.yml
+    .
+    ├── frontend/                 # Next.js application
+    │   ├── app/                  # App router pages
+    │   │   ├── cart/            # Shopping cart page
+    │   │   ├── login/           # Login page
+    │   │   ├── orders/          # Order history & details
+    │   │   │   ├── checkout/   # Checkout processing
+    │   │   │   └── [orderId]/  # Order detail page
+    │   │   ├── products/        # Product listing with search
+    │   │   └── register/        # Registration page
+    │   ├── components/          # React components (Navbar, etc.)
+    │   ├── contexts/            # React contexts for global state
+    │   ├── lib/                 # API utilities and TypeScript types
+    │   └── package.json
+    │
+    ├── src/                     # Spring Boot backend
+    │   └── main/
+    │       ├── java/com/example/ecommerceplatform/
+    │       │   ├── auth/       # Authentication & JWT
+    │       │   ├── cart/       # Shopping cart logic
+    │       │   ├── catalog/    # Product management
+    │       │   ├── order/      # Order processing
+    │       │   ├── user/       # User management
+    │       │   └── common/     # Shared utilities
+    │       └── resources/
+    │           ├── db/migration/  # Flyway migrations
+    │           └── application.yml
+    │
+    ├── docker-compose.yml       # Container configuration
+    ├── build.gradle             # Backend dependencies
+    └── README.md
 
 ## Getting Started
 
@@ -51,32 +91,42 @@ This project includes **JWT authentication**, **role-based authorization**, **Sw
 
 Make sure you have installed:
 
-- Docker Desktop
-- Java 17+
+- **Docker Desktop** - For running backend containers
+- **Java 17+** - For backend development
+- **Node.js 18+** - For frontend development
+- **npm** - Node package manager
 - Gradle (optional if using `./gradlew`)
 
-## Running the Project with Docker
-
-This project is fully containerized using Docker Compose.
+## Running the Project
 
 ### 1. Clone the repository
 
     git clone <your-repo-url>
     cd ecommerce-platform
 
-### 2. Start the containers
+### 2. Start the backend with Docker
 
     docker compose up --build
 
 This starts:
+- PostgreSQL database on port 5432
+- Spring Boot API on port 8080
 
-- PostgreSQL database
-- Spring Boot application
+### 3. Start the frontend
 
-### 3. Access the application
+In a separate terminal:
 
-- App: `http://localhost:8080`
-- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+    cd frontend
+    npm install
+    npm run dev
+
+The frontend will start on port 3000.
+
+### 4. Access the application
+
+- **Frontend**: `http://localhost:3000` - Main application UI
+- **Backend API**: `http://localhost:8080`
+- **Swagger UI**: `http://localhost:8080/swagger-ui/index.html` - API documentation
 
 ## Docker Setup
 
@@ -147,13 +197,25 @@ Set database and JWT values in your local environment or `application.properties
 
 ## Example Workflow
 
-1. Register a new user
-2. Log in to receive a JWT token
-3. Authorize in Swagger using the token
-4. Access protected endpoints
-5. Create or manage products
-6. Add items to cart
-7. Place an order
+### Using the Web Application
+
+1. Visit `http://localhost:3000`
+2. **Register** a new account with email and password
+3. **Login** to receive JWT token (stored in browser)
+4. **Browse products** - Search and paginate through available items
+5. **Add to cart** - Click "Add to Cart" on any product
+6. **Manage cart** - Update quantities or remove items
+7. **Checkout** - Click "Proceed to Checkout" to place order
+8. **View orders** - Access "My Orders" to see order history
+9. **Order details** - Click any order to view full details
+10. **Logout** - Click logout button in navbar
+
+### Using the API (Swagger)
+
+1. Visit `http://localhost:8080/swagger-ui/index.html`
+2. Register/login via `/api/v1/auth` endpoints to receive JWT
+3. Click "Authorize" and enter: `Bearer <your-token>`
+4. Test any protected endpoint directly from Swagger UI
 
 ## Security
 
@@ -164,35 +226,81 @@ Set database and JWT values in your local environment or `application.properties
 
 ## Future Improvements
 
-This project is planned to evolve toward a more production-ready e-commerce system. Future improvements include:
+This project is planned to evolve toward a more production-ready e-commerce system. Planned enhancements include:
 
-- Frontend application for customer and admin workflows
-- Refresh token support and stronger auth/session handling
-- Payment integration
-- Inventory and stock management
-- Search and filtering
-- Elastisearch
-- Order history and user dashboard
+### Frontend
+- Product detail pages with images and descriptions
+- Admin dashboard for product management
+- User profile page and settings
+- Cart item count badge in navbar
+- Enhanced error handling and loading states
+- Product images and rich descriptions
+
+### Backend & Infrastructure
+- Refresh token support for better session management
+- Payment gateway integration (Stripe/PayPal)
+- Advanced inventory and stock management
+- Elasticsearch for advanced product search
 - Admin analytics and reporting
-- Redis caching
-- Message queues/event-driven workflows
-- CI/CD pipeline
-- Cloud deployment
-- Monitoring and logging
-- Better test coverage for production-quality reliability
+- Redis caching for performance
+- Message queues for async workflows (order notifications, emails)
+- Enhanced test coverage (unit, integration, E2E)
+
+### DevOps
+- CI/CD pipeline (GitHub Actions)
+- Cloud deployment (AWS/GCP/Azure)
+- Monitoring and logging (Prometheus, Grafana)
+- Load balancing and scaling strategies
 
 ## Learning Goals
 
-This project was built to practice production-style backend engineering concepts, including:
+This full-stack project was built to practice production-style engineering concepts across the entire stack.
 
-- Secure authentication and authorization
-- REST API design
-- Transaction handling
-- Pagination
+### Frontend Development
+- Modern React patterns (hooks, custom hooks, context API)
+- TypeScript for type-safe development
+- Next.js App Router and client-side routing
+- State management and API integration
+- Form handling and validation
+- Responsive UI design with Tailwind CSS
+- User experience and interface design
+- Error handling and loading states
+
+### Backend Development
+- Secure authentication and authorization with JWT
+- RESTful API design and best practices
+- Transaction handling and data integrity
+- Pagination and efficient data queries
+- Database schema design and relationships
 - Database migrations with Flyway
+- API documentation with Swagger/OpenAPI
 - Containerized development with Docker
-- API documentation with Swagger
-- Designing backend systems with future production scaling in mind
+
+### Full-Stack Integration
+- Frontend-backend communication patterns
+- Token-based authentication flow
+- Error handling across the stack
+- Building complete user workflows
+- Designing systems for production scalability
+
+## Screenshots
+
+### Home Page
+![Home Page](./screenshots/home.png)
+
+### Product Listing
+![Products Page](./screenshots/products.png)
+
+### Shopping Cart
+![Shopping Cart](./screenshots/cart.png)
+
+### Order History
+![Order History](./screenshots/orders.png)
+
+### Order Confirmation
+![Order Confirmation](./screenshots/order-detail.png)
+
+---
 
 ## Author
 
