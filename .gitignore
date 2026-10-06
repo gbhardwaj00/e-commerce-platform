@@ -79,8 +79,6 @@ infra/docker-compose.*.yml
 !infra/docker-compose.dev.yml
 !infra/docker-compose.prod.yml
 
-compose.yaml
-compose.yml
 compose.override.yaml
 compose.override.yml
 
