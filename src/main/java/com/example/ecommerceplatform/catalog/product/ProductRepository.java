@@ -18,6 +18,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Page<Product> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select p from Product p where p.id in :ids")
+    @Query("select p from Product p where p.id in :ids order by p.id")
     List<Product> findAllByIdInForUpdate(@Param("ids") List<UUID> ids);
 }
